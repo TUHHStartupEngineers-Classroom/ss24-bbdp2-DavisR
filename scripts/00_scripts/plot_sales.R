@@ -1,10 +1,10 @@
 plot_total_sales <-
-function(unit = "month", date_format = "%B %Y", interactive = TRUE) {
+function(bike_orderlines_tbl, unit = "month", date_format = "%B %Y", interactive = TRUE) {
   
   # Handle Data
   data_tbl <- bike_orderlines_tbl %>%
     
-    select(order_date, total_price) %>%
+    dplyr::select(order_date, total_price) %>%
     
     mutate(date_rounded = floor_date(order_date, unit = unit)) %>%
     
