@@ -3,6 +3,9 @@ title: "Sales Report"
 author: "Davis Rakhshan"
 date: "2024-07-03"
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
   html_document:
     code_folding: none
     df_print: paged
@@ -11,9 +14,6 @@ output:
     theme: flatly
     toc: yes
     toc_depth: 2
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
 ---
 
 
@@ -32,6 +32,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(lubridate)
 library(plotly)
+library(dplyr)
 
 source("00_scripts/plot_sales.R")
 
@@ -137,13 +138,13 @@ if(knitr::is_html_output()) {
 
 
 ```{r, out.height="600px"}
-plot_total_sales(unit = "month", date_format = "%B %d, %Y", interactive = FALSE)
+plot_total_sales(bike_orderlines_tbl, unit = "month", date_format = "%B %d, %Y", interactive = FALSE)
 ```
 
 ## Weekly Sales Trends
 
 ```{r, out.height="600px"}
-plot_total_sales(unit = "week", date_format = "%B %d, %Y", interactive = FALSE)
+plot_total_sales(bike_orderlines_tbl, unit = "week", date_format = "%B %d, %Y", interactive = FALSE)
 ```
 
 

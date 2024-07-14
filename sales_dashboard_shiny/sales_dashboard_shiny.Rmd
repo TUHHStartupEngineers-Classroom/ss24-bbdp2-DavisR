@@ -1,0 +1,233 @@
+---
+title: "Sales Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+# Shiny
+library(flexdashboard)
+library(shiny)
+library(DT)
+
+# Core
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(shinyWidgets)
+library(sf) # For map data
+library(ggplot2)
+library(scales)
+# Interactive Visualizations
+# Spatial Data
+library(raster)
+library(sf)
+
+# Currency formatting
+source("data/00_scripts/plot_sales.R")
+```
+
+```{r}
+# Bike data
+bikes_tbl      <- readRDS("data/bikes_tbl.rds")
+bikeshops_tbl  <- readRDS("data/bikeshops_tbl.rds")
+orderlines_tbl <- readRDS("data/orderlines_tbl.rds")
+
+bike_orderlines_tbl <- orderlines_tbl %>%
+    left_join(bikes_tbl,     by = c("product_id" = "bike_id")) %>%
+    left_join(bikeshops_tbl, by = c("customer_id" = "bikeshop_id")) %>%
+    mutate(total_price = price_euro * quantity)
+
+
+# German spatial data
+germany_sp <- readRDS("data/gadm36_DEU_1_sp.rds")#getData('GADM', country='DE', level=1) 
+germany_sf <- st_as_sf(germany_sp) %>% 
+  
+                  # Add english names
+                  mutate(VARNAME_1 = ifelse(is.na(VARNAME_1), NAME_1, VARNAME_1)) 
+```
+
+
+
+
+Sidebar {.sidebar}
+------------------------
+
+```{r}
+# Inputs
+dateRangeInput(inputId = "date_range", 
+               label   = h4("Date Range"), 
+               start   = min(bike_orderlines_tbl$order_date), 
+               end     = max(bike_orderlines_tbl$order_date),         
+               min     = min(bike_orderlines_tbl$order_date), 
+               max     = max(bike_orderlines_tbl$order_date), 
+               startview = "year")
+
+checkboxGroupButtons(
+  inputId = "checkbox_group_1", 
+  label = h4("Bike Type"), 
+  choices = c("Mountain", "Road", "Hybrid/City", "E-Bikes", "Gravel"),
+  selected = c("Mountain", "Road"),
+  checkIcon = list(
+    yes = icon("ok", 
+               lib = "glyphicon"))
+)
+
+pickerInput(
+  inputId = "picker_input_2", 
+  label = h4("Bike Family"), 
+  choices = unique(bike_orderlines_tbl$category_2),
+  selected = unique(bike_orderlines_tbl$category_2),
+  multiple = TRUE
+)
+
+actionButton(inputId = "apply", label = "Apply", icon = icon("play"))
+
+# Reset Button
+actionButton(inputId = "reset", 
+             label   = "Reset", 
+             icon    = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
+  updateCheckboxGroupButtons(session  = session, 
+                             inputId  = "checkbox_group_1", 
+                             selected = c("Mountain", "Road"))
+  
+  updateDateRangeInput(session = session, 
+                       inputId = "date_range", 
+                       start   = min(bike_orderlines_tbl$order_date), 
+                       end     = max(bike_orderlines_tbl$order_date))
+  
+  updatePickerInput(session = session, 
+                    inputId = "picker_input_2", 
+                    selected = c("Trail"))
+})
+```
+
+
+
+Column {data-width=1000}
+---------------------------------------------------------------
+### By State
+
+```{r}
+geo_plot_tbl <- bike_orderlines_tbl %>% 
+                  group_by(state) %>%
+                  summarise(total_revenue = sum(total_price)) %>%
+                  ungroup() %>%
+                  right_join(germany_sf, by = c("state" = "VARNAME_1")) %>% 
+                  mutate(total_revenue = ifelse(is.na(total_revenue), 0, total_revenue)) %>% 
+                  mutate(label_text = str_glue("State: {state}
+                                         Revenue: {format_to_euro(total_revenue)}")) %>% 
+                  st_as_sf()
+```
+```{r}
+plot_ly(geo_plot_tbl, 
+        split      = ~NAME_1, 
+        color      = ~total_revenue,
+        colors     = "Blues",
+        stroke     = I("black"),
+        hoverinfo  = 'text', 
+        text       = ~label_text, 
+        hoveron    = "fills", 
+        showlegend = FALSE) 
+```
+
+
+
+```{r}
+# Sample Map Data (Germany states)
+germany <- st_as_sf(maps::map("world", "Germany", plot = FALSE, fill = TRUE))
+
+
+output$plot_2 <- renderPlotly({
+  req(sales_data_filtered())
+                                    print("sales_data_filtered")
+                                    print(sales_data_filtered())
+  plot_data <- sales_data_filtered() %>%
+    group_by(state = sample(germany$ID, n(), replace = TRUE)) %>%
+    summarise(total_sales = sum(sales_data_filtered()$total_price))
+
+  ggplot() +
+    geom_sf(data = germany, aes(geometry = geometry, fill = plot_data$total_sales)) +
+    scale_fill_viridis_c(option = "viridis", labels = dollar) +
+    theme_void() +
+    labs(title = "Sales by Region")
+})
+
+plotlyOutput(outputId = "plot_2")
+```
+
+Column {data-width=750}
+-----------------------
+
+### Section - Sales Over Time
+```{r}
+# Time unit selection
+shinyWidgets::radioGroupButtons(
+  inputId = "time_unit", 
+  label = "Time Unit", 
+  choices = c("D", "W", "M", "Q", "Y"), 
+  selected = "D",
+  checkIcon = list(yes = icon("ok", lib = "glyphicon")),
+  status = "primary",
+  direction = "horizontal",
+  width = "100%", # Ensures buttons stretch across the container
+  justified = TRUE,
+  individual = TRUE # Ensures each button is treated individually
+)
+
+
+output$plot_1 <- renderPlotly({
+  # Ensure sales_data_filtered is non-null
+  req(sales_data_filtered())
+
+  # Aggregate data based on selected time unit
+  sales_data_aggregated <- sales_data_filtered() %>%
+    mutate(time_period = case_when(
+      input$time_unit == "D" ~ floor_date(order_date, "day"),
+      input$time_unit == "W" ~ floor_date(order_date, "week"),
+      input$time_unit == "M" ~ floor_date(order_date, "month"),
+      input$time_unit == "Q" ~ floor_date(order_date, "quarter"),
+      input$time_unit == "Y" ~ floor_date(order_date, "year")
+    )) %>%
+    group_by(time_period) %>%
+    summarise(sales = sum(total_price), .groups = 'drop')
+
+    p <- sales_data_aggregated %>%
+		ggplot(aes(x = time_period, y = sales)) +
+		# Geoms
+		geom_line(color = "black", size = 0.3) +
+		geom_smooth(method = "loess", span = 0.2) +
+		# Formatting
+		scale_y_continuous(labels = euro_format()) +
+		expand_limits(y = 0) +
+		theme_minimal() +
+		labs(
+		  title = "Total Sales",
+		  y = "Revenue (Euro)",
+		  x = ""
+		) + 
+		theme(legend.position = "none")
+
+  
+  ggplotly(p)
+})
+
+plotlyOutput(outputId = "plot_1")
+```
+
+```{r}
+# Reactive Filter with Apply Button
+sales_data_filtered <- eventReactive(input$apply, {
+  filtered <- bike_orderlines_tbl %>%
+    filter(category_1 %in% input$checkbox_group_1) %>%
+    filter(category_2 %in% input$picker_input_2) %>%
+    filter(order_date >= input$date_range[1] & order_date <= input$date_range[2])
+  
+  filtered
+})
+```

@@ -1,0 +1,8 @@
+---
+title: "Data-Driven Decision Making for Business"
+author: "Davis Rakhshan"
+---
+
+# Certificate
+
+The certificate can be found here: [certificate](certificate.pdf)

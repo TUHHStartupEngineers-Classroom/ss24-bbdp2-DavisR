@@ -53,7 +53,7 @@
     "href": "index.html",
     "title": "My Lab Journal",
     "section": "",
-    "text": "This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish."
+    "text": "See the journal content for the challenges."
   },
   {
     "objectID": "index.html#how-to-use",
@@ -61,5 +61,26 @@
     "title": "My Lab Journal",
     "section": "How to use",
     "text": "How to use\n\nAccept the assignment and get your own github repo.\nBlog/journal what you are doing in R, by editing the .qmd files.\nSee the links page for lots of helpful links on learning R.\nChange everything to make it your own.\nMake sure to render you website everytime before you want to upload changes"
+  },
+  {
+    "objectID": "content/01_journal/01_reporting_tools.html",
+    "href": "content/01_journal/01_reporting_tools.html",
+    "title": "Reporting Tools",
+    "section": "",
+    "text": "1 RMarkdown Challenge\nYou can find the .pdf-file here: sales_report.pdf\nThe .html-file can be found here: sales_report.html\n\n\n2 Shiny Challenge\nThe code for the Shiny app can be found under: content/shinyApp.Rmd\nThe Shiny app can be found on the Shiny Web App"
+  },
+  {
+    "objectID": "content/01_journal/02_stock_analyzer.html",
+    "href": "content/01_journal/02_stock_analyzer.html",
+    "title": "Stock Analyzer",
+    "section": "",
+    "text": "1 Stock Analyzer\nThe deployed stock analyzer app can be found here: Stock Analyzer"
+  },
+  {
+    "objectID": "content/01_journal/03_data-driven_decision_making.html",
+    "href": "content/01_journal/03_data-driven_decision_making.html",
+    "title": "Data-Driven Decision Making for Business",
+    "section": "",
+    "text": "1 Certificate\nThe certificate can be found here: certificate"
   }
 ]
