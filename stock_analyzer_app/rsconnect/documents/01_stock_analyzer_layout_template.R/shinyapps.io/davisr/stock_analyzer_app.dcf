@@ -1,0 +1,12 @@
+name: stock_analyzer_app
+title: stock_analyzer_app
+username: davisr
+account: davisr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12310017
+bundleId: 8856304
+url: https://davisr.shinyapps.io/stock_analyzer_app/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

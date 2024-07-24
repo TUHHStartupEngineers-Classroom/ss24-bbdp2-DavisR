@@ -1,0 +1,18 @@
+---
+title: "Reporting Tools"
+author: "Davis Rakhshan"
+---
+
+# RMarkdown Challenge
+
+You can find the .pdf-file here: [sales_report.pdf](ch1.pdf)
+
+The .html-file can be found here: [sales_report.html](ch1.html)
+
+
+
+# Shiny Challenge
+
+The code for the Shiny app can be found under: content/shinyApp.Rmd
+
+The Shiny app can be found on the [Shiny Web App](https://davisr.shinyapps.io/sales_dashboard_shiny/)

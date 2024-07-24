@@ -1,0 +1,8 @@
+---
+title: "Stock Analyzer"
+author: "Davis Rakhshan"
+---
+
+# Stock Analyzer
+
+The deployed stock analyzer app can be found here: [Stock Analyzer](https://davisr.shinyapps.io/stock_analyzer_app/)

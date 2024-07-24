@@ -1,0 +1,12 @@
+name: sales_dashboard_shiny
+title: sales_dashboard_shiny
+username: davisr
+account: davisr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12300086
+bundleId: 8846936
+url: https://davisr.shinyapps.io/sales_dashboard_shiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
